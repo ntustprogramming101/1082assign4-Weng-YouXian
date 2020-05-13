@@ -46,8 +46,9 @@ int [] xEmpty2 = new int [SOIL_ROW_COUNT];
 
 float[] cabbageX=new float [6];
 float[] cabbageY=new float [6];
-float[] soldierX, soldierY=new float [6];
-float soldierSpeed = 2f;
+float[] soldierX=new float [6];
+float[] soldierY=new float [6];
+float[] soldierSpeed = new float [6];
 
 int playerCol, playerRow;
 final float PLAYER_INIT_X = 4 * SOIL_SIZE;
@@ -75,6 +76,7 @@ void setup() {
   frameRate(60);
   lastTime = millis(); // save lastest time call the millis();
   stroll=0;
+  
   size(640, 480, P2D);
   bg = loadImage("img/bg.jpg");
   title = loadImage("img/title.jpg");
@@ -139,16 +141,22 @@ void setup() {
     xEmpty2[i]=floor(random(0,8));
   }
   // Initialize soidiers and their position
-
+  for (int i =0;i<soldierX.length;i++){
+      soldierX[i]=floor(random(0,8));
+  }
+  for (int j =0;j<soldierY.length;j++){
+    soldierY[j]=floor(random(0,4));
+  }
+  for (int k=0;k<soldierSpeed.length;k++){
+    soldierSpeed[k]=0;
+  }
   // Initialize cabbages and their position
   for (int i =0;i<cabbageX.length;i++){
       cabbageX[i]=floor(random(0,8));
   }
-  println(cabbageX);
   for (int j =0;j<cabbageY.length;j++){
     cabbageY[j]=floor(random(0,4));
   }
-  println(cabbageY);
 }
 
 
@@ -268,12 +276,6 @@ void draw() {
         } 
       }
     }
-    //life
-    for(int i=0;i<playerHealthMax;i++){
-      imageMode(CORNER);
-      image(life,lifeX+(lifeW+lifeSpace)*i,lifeY);
-    }
-
 		// Player
     //draw the groundhogDown image between 1-14 frames
       if (downState) {
@@ -384,9 +386,40 @@ void draw() {
         }
       }
     }
-    
+    //soldier moving
+    for (int i =0;i<soldierX.length;i++){
+      for (int j =0;j<soldierY.length;j++){
+        if(i==j){
+          for (int k =0; k<soldierSpeed.length;k++){
+            if(soldierSpeed[k]<width){
+                soldierSpeed[k]++;
+                image(soldier,soldierX[i] * SOIL_SIZE+soldierSpeed[k], (j*4+soldierY[j]+2) * SOIL_SIZE+stroll);
+            }else{
+              soldierSpeed[k]=-soldierX[i] * SOIL_SIZE-SOIL_SIZE;
+            }                
+                image(soldier,soldierX[i] * SOIL_SIZE+soldierSpeed[k], (j*4+soldierY[j]+2) * SOIL_SIZE+stroll);
+                if(soldierX[i] * SOIL_SIZE<playerX+groundhogW&& soldierX[i] * SOIL_SIZE+SOIL_SIZE>playerX&& (j*4+soldierY[j]+2) * SOIL_SIZE+stroll<playerY+groundhogW&& (j*4+soldierY[j]+2) * SOIL_SIZE+stroll+SOIL_SIZE>playerY){
+                  playerHealthMax-=1;
+                  rightState = leftState = downState = false;
+                  playerX = PLAYER_INIT_X;
+                  playerY = PLAYER_INIT_Y;
+                  stroll=0;
+                  if (playerHealthMax==0){
+                    gameState = 2;
+                  }
+                }
+
+            }
+          }
+        }
+      }
 
 		// Health UI
+    //life
+    for(int i=0;i<playerHealthMax;i++){
+      imageMode(CORNER);
+      image(life,lifeX+(lifeW+lifeSpace)*i,lifeY);
+    }
 
 		break;
 
